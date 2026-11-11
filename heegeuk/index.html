@@ -259,7 +259,7 @@ function beginAtk(k){const p=g.p,C=COMBOS[p.id];let seq=(g.t-p.seqT<.6?p.seq:'')
   if(!Object.keys(C).some(c=>c.startsWith(seq)))seq=k;
   const fin=C[seq]||null;p.seq=fin?'':seq;p.seqT=g.t;p.state='atk';p.t=0;p.hitDone=false;p.buf=null;
   const base=p.st[k];p.atk={...base,btn:k,fin,dur:base.dur+(fin?.1:0)+(fin&&fin.slow||0),hit:base.hit+(fin&&fin.slow||0)};
-  if(fin)g.fx.push({k:'combo',txt:fin.name,t:0});beep(k==='A'?320:210,.05)}
+  beep(k==='A'?320:210,.05)}
 const bindBtn=(el,fn,up)=>{el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('down');try{el.setPointerCapture(e.pointerId)}catch(_){}fn()});
   ['pointerup','pointercancel','lostpointercapture'].forEach(n=>el.addEventListener(n,()=>{el.classList.remove('down');up&&up()}));el.addEventListener('contextmenu',e=>e.preventDefault())};
 bindBtn($('btnA'),()=>press('A'),()=>release('A'));bindBtn($('btnB'),()=>press('B'),()=>release('B'));bindBtn($('btnS'),()=>{if(g&&!g.over)trySpecial()});
@@ -283,7 +283,7 @@ function spawnWave(){const w=WAVES[g.wi];g.spawned=true;g.go=false;
   if(w.foes.includes('b')){g.fx.push({k:'banner',txt:'노잼단장 등장!',t:0,bad:true});[196,185,175,165].forEach((f,i)=>beep(f,.18,i*.16))}}
 function addKi(n){const p=g.p;if(p.state==='special')return;const was=p.ki;p.ki=Math.min(100,p.ki+n);if(was<100&&p.ki>=100){beep(1047,.1);beep(1319,.16,.1);g.fx.push({k:'float',x:p.x,y:p.y-p.h-8,txt:'기 가득! A+B',t:0,gold:true});$('btnS').hidden=false}}
 function hurtFoe(e,dmg,o){if(e.state==='dead')return;const dir=o.dir,boss=e.k==='b';dmg=Math.round(dmg);const real=Math.min(dmg,Math.max(0,e.hp));e.hp-=dmg;e.dir=-dir;g.score+=real*5*(g.combo>=20?2:g.combo>=10?1.5:1)|0;g.combo++;g.comboT=1.5;
-  g.fx.push({k:'hit',x:e.x-dir*6,y:e.y-34*e.F.sc-e.z,txt:'',t:0,big:o.fin});g.shake=Math.max(g.shake,o.fin?.18:.07);g.freeze=Math.max(g.freeze,o.fin?.09:.04);beep(o.fin?110:170,.07);
+  g.fx.push({k:'hit',x:e.x-dir*6,y:e.y-34*e.F.sc-e.z,txt:o.txt??'퍽!',t:0,big:o.fin});g.shake=Math.max(g.shake,o.fin?.18:.07);g.freeze=Math.max(g.freeze,o.fin?.09:.04);beep(o.fin?110:170,.07);
   if(e.hp<=0){e.state='dead';e.t=0;e.kx=dir*((o.kb||40)+80);e.vz=150;g.score+=e.F.score;if(!o.noKi)addKi(KI.kill);g.fx.push({k:'float',x:e.x,y:e.y-60*e.F.sc,txt:boss?'꿀잼이었다…ㅋ':'ㅋ',t:0});if(boss)[523,659,784,1047,1319].forEach((f,i)=>beep(f,.14,i*.09));return}
   const stuck=boss&&e.state==='stuck';
   if(o.pull){e.kx=-dir*160}
@@ -320,7 +320,7 @@ function hurtPlayer(dmg,dir){const p=g.p;if(p.inv>0||p.state==='dead')return;p.h
 /* ---------- 주인공 ---------- */
 function rollDmg(a){let d=Array.isArray(a.dmg)?rnd(a.dmg[0],a.dmg[1]):a.dmg,crit=false;const c=(a.fin&&a.fin.crit)||a.crit||0;if(c&&Math.random()<c){d*=3;crit=true}return{d:d*(a.fin?a.fin.mult:1),crit}}
 function hitFoes(a){const p=g.p,f=a.fin||{};let n=0;
-  for(const c of g.crates){if(c.hp>0&&Math.sign(c.x-p.x||p.dir)===p.dir&&Math.abs(c.x-p.x)<a.range+10&&Math.abs(c.y-p.y)<20){c.hp=0;g.drops.push({x:c.x,y:c.y,item:c.item,t:0});g.fx.push({k:'hit',x:c.x,y:c.y-18,txt:'',t:0});beep(240,.08)}}
+  for(const c of g.crates){if(c.hp>0&&Math.sign(c.x-p.x||p.dir)===p.dir&&Math.abs(c.x-p.x)<a.range+10&&Math.abs(c.y-p.y)<20){c.hp=0;g.drops.push({x:c.x,y:c.y,item:c.item,t:0});g.fx.push({k:'hit',x:c.x,y:c.y-18,txt:'와작!',t:0});beep(240,.08)}}
   for(const e of g.es){if(e.state==='dead'||e.state==='down')continue;const dx=e.x-p.x,near=f.aoe&&Math.hypot(dx,e.y-p.y)<f.aoe;
     if(near||(Math.sign(dx||p.dir)===p.dir&&Math.abs(dx)<a.range+12*e.F.sc&&Math.abs(e.y-p.y)<(a.wide?24:17))){const r=rollDmg(a);
       hurtFoe(e,r.d,{dir:near&&!dx?p.dir:(near?Math.sign(dx):p.dir),kb:f.kb??a.kb,down:f.down,stun:f.stun??a.stun,launch:f.launch,pull:f.pull,fin:!!a.fin,txt:r.crit?'대박!':(a.fin?'쾅!':a.txt)});
