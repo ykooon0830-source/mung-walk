@@ -210,21 +210,21 @@ const FOE={
 /* 파이터별 능력치와 손(A)·발(B) 공격 */
 const PSTAT={
   shin:{h:122,nat:1, hp:100,spd:112,sleeve:'#2F9E73',leg:'#F2C9A6',shoe:'#B5544A',
-    A:{kind:'bike', dmg:9, range:70,hit:.14,dur:.36,kb:60, txt:'퍽!',wide:true},
-    B:{kind:'kick', dmg:6, range:44,hit:.1,dur:.26, kb:10, txt:'아야!',stun:.6,low:true},
-    sp:{name:'라이딩 출발',kind:'ride',dur:2.3}},
+    A:{kind:'bike', dmg:9, range:70,hit:.14,dur:.36,kb:60, txt:'',say:'이상해',wide:true},
+    B:{kind:'kick', dmg:6, range:44,hit:.1,dur:.26, kb:10, txt:'',say:'반말이냐?',stun:.6,low:true},
+    sp:{name:'기냥 달려~',kind:'ride',dur:2.3}},
   lim:{h:124,nat:1, hp:100,spd:98, sleeve:'#55565E',leg:'#4B4C54',shoe:'#26262B',
-    A:{kind:'book', dmg:8, range:50,hit:.11,dur:.28,kb:30, txt:'탁!',stun:.25},
-    B:{kind:'cross',dmg:10,range:58,hit:.14,dur:.32,kb:120,txt:'팍!'},
-    sp:{name:'기도',kind:'pray',dur:1.6}},
+    A:{kind:'book', dmg:8, range:50,hit:.11,dur:.28,kb:30, txt:'',say:'오, 주여',stun:.25},
+    B:{kind:'cross',dmg:10,range:58,hit:.14,dur:.32,kb:120,txt:'',say:'할렐루야'},
+    sp:{name:'예수 그리스도의 이름으로',kind:'pray',dur:1.6}},
   park:{h:120,nat:-1,hp:120,spd:84, sleeve:'#EE6B78',leg:'#EE6B78',shoe:'#F4F1EA',
-    A:{kind:'punch',dmg:[4,14],range:46,hit:.12,dur:.32, kb:30, txt:'툭',crit:.15},
-    B:{kind:'kick', dmg:[6,16],range:48,hit:.16,dur:.36,kb:60, txt:'턱',proj:.2},
-    sp:{name:'그냥 눕기',kind:'lie',dur:3.0}},
+    A:{kind:'punch',dmg:[4,14],range:46,hit:.12,dur:.32, kb:30, txt:'',say:'담배있냐?',crit:.15},
+    B:{kind:'kick', dmg:[6,16],range:48,hit:.16,dur:.36,kb:60, txt:'',say:'니가 쏘냐?',proj:.2},
+    sp:{name:'에이씨, 몰라!',kind:'lie',dur:3.0}},
   jang:{h:124,nat:-1,hp:110,spd:90, sleeve:'#9A9AA2',leg:'#7C7C84',shoe:'#3A3A40',
-    A:{kind:'palm', dmg:10,range:44,hit:.14,dur:.34,kb:210,txt:'합!'},
-    B:{kind:'moktak',dmg:12,range:40,hit:.12,dur:.3,kb:10, txt:'똑!',stun:.8},
-    sp:{name:'합장',kind:'hapjang',dur:1.7}}};
+    A:{kind:'palm', dmg:10,range:44,hit:.14,dur:.34,kb:210,txt:'',say:'성불하세요'},
+    B:{kind:'moktak',dmg:12,range:40,hit:.12,dur:.3,kb:10, txt:'',say:'번뇌타파',stun:.8},
+    sp:{name:'마하반야바라밀',kind:'hapjang',dur:1.7}}};
 /* 콤보: 누른 순서 → 마무리 효과. mult 피해 배수, down 넘어뜨림, stun 멈춤(초), kb 밀어내기 */
 const COMBOS={
   shin:{AAA:{name:'바퀴 세트',mult:1.7,down:true,kb:200},BBB:{name:'조인트 연타',mult:1.5,stun:1.2},BA:{name:'까고 치기',mult:1.6,down:true,kb:120,launch:260},AAB:{name:'벌점 딜링',mult:1.6,stun:1.0}},
@@ -254,7 +254,7 @@ function press(k){if(!g||g.over)return;const o=k==='A'?'B':'A';inp[k]=true;inp['
 function release(k){inp[k]=false}
 function trySpecial(){const p=g.p;if(p.ki<100||p.state==='special'||p.state==='dead'||p.state==='hurt')return;
   p.state='special';p.t=0;p.ki=0;p.sp={...p.st.sp,hit:false,tick:0,pass:-1};p.inv=p.sp.dur+.4;p.buf=null;p.seq='';$('btnS').hidden=true;
-  g.fx.push({k:'banner',txt:p.st.sp.name+'!',t:0,low:true});[392,523,659,784,1047].forEach((f,i)=>beep(f,.12,i*.05))}
+  g.fx.push({k:'banner',txt:p.st.sp.name,t:0,low:true});[392,523,659,784,1047].forEach((f,i)=>beep(f,.12,i*.05))}
 function beginAtk(k){const p=g.p,C=COMBOS[p.id];let seq=(g.t-p.seqT<.6?p.seq:'')+k;
   if(!Object.keys(C).some(c=>c.startsWith(seq)))seq=k;
   const fin=C[seq]||null;p.seq=fin?'':seq;p.seqT=g.t;p.state='atk';p.t=0;p.hitDone=false;p.buf=null;
@@ -283,7 +283,7 @@ function spawnWave(){const w=WAVES[g.wi];g.spawned=true;g.go=false;
   if(w.foes.includes('b')){g.fx.push({k:'banner',txt:'노잼단장 등장!',t:0,bad:true});[196,185,175,165].forEach((f,i)=>beep(f,.18,i*.16))}}
 function addKi(n){const p=g.p;if(p.state==='special')return;const was=p.ki;p.ki=Math.min(100,p.ki+n);if(was<100&&p.ki>=100){beep(1047,.1);beep(1319,.16,.1);g.fx.push({k:'float',x:p.x,y:p.y-p.h-8,txt:'기 가득! A+B',t:0,gold:true});$('btnS').hidden=false}}
 function hurtFoe(e,dmg,o){if(e.state==='dead')return;const dir=o.dir,boss=e.k==='b';dmg=Math.round(dmg);const real=Math.min(dmg,Math.max(0,e.hp));e.hp-=dmg;e.dir=-dir;g.score+=real*5*(g.combo>=20?2:g.combo>=10?1.5:1)|0;g.combo++;g.comboT=1.5;
-  g.fx.push({k:'hit',x:e.x-dir*6,y:e.y-34*e.F.sc-e.z,txt:o.txt||'퍽!',t:0,big:o.fin});g.shake=Math.max(g.shake,o.fin?.18:.07);g.freeze=Math.max(g.freeze,o.fin?.09:.04);beep(o.fin?110:170,.07);
+  g.fx.push({k:'hit',x:e.x-dir*6,y:e.y-34*e.F.sc-e.z,txt:o.txt??'퍽!',t:0,big:o.fin});g.shake=Math.max(g.shake,o.fin?.18:.07);g.freeze=Math.max(g.freeze,o.fin?.09:.04);beep(o.fin?110:170,.07);
   if(e.hp<=0){e.state='dead';e.t=0;e.kx=dir*((o.kb||40)+80);e.vz=150;g.score+=e.F.score;if(!o.noKi)addKi(KI.kill);g.fx.push({k:'float',x:e.x,y:e.y-60*e.F.sc,txt:boss?'꿀잼이었다…ㅋ':'ㅋ',t:0});if(boss)[523,659,784,1047,1319].forEach((f,i)=>beep(f,.14,i*.09));return}
   const stuck=boss&&e.state==='stuck';
   if(o.pull){e.kx=-dir*160}
@@ -325,7 +325,7 @@ function hitFoes(a){const p=g.p,f=a.fin||{};let n=0;
     if(near||(Math.sign(dx||p.dir)===p.dir&&Math.abs(dx)<a.range+12*e.F.sc&&Math.abs(e.y-p.y)<(a.wide?24:17))){const r=rollDmg(a);
       hurtFoe(e,r.d,{dir:near&&!dx?p.dir:(near?Math.sign(dx):p.dir),kb:f.kb??a.kb,down:f.down,stun:f.stun??a.stun,launch:f.launch,pull:f.pull,fin:!!a.fin,txt:r.crit?'대박!':(a.fin?'쾅!':a.txt)});
       if(r.crit)g.fx.push({k:'float',x:p.x,y:p.y-p.h-6,txt:'어, 맞았네',t:0});n++}}
-  if(n){addKi((a.fin?KI.fin:KI.hit)+(n-1)*KI.extra)}
+  if(n){if(a.say){g.fx=g.fx.filter(f=>f.k!=='say');g.fx.push({k:'say',txt:a.say,t:0})}addKi((a.fin?KI.fin:KI.hit)+(n-1)*KI.extra)}
   const pr=Math.max(a.proj||0,f.proj||0);if(pr&&Math.random()<pr){g.shots.push({x:p.x+p.dir*20,y:p.y,vx:p.dir*300,dmg:10,txt:'🩴',slip:true,t:0});beep(500,.08)}
   return n}
 function updSpecial(dt){const p=g.p,s=p.sp,foes=g.es.filter(e=>e.state!=='dead');
@@ -372,7 +372,7 @@ function step(dt){if(g.freeze>0){g.freeze-=dt;return}
   const ct=g.wi>=WAVES.length?g.cam+GW+200:g.spawned?WAVES[g.wi].at:(g.wi>0?WAVES[g.wi-1].at+GW+10:0);g.colorX+=(ct-g.colorX)*Math.min(1,dt*2.2);
   updPlayer(dt);for(const e of g.es)updFoe(e,dt);updShots(dt);
   g.crates.forEach(c=>c.t+=dt);g.drops.forEach(d=>d.t+=dt);g.drops=g.drops.filter(d=>!d.got);
-  g.fx.forEach(f=>f.t+=dt);g.fx=g.fx.filter(f=>f.t<(f.k==='banner'?1.5:f.k==='float'||f.k==='combo'?1.1:f.k==='flash'?.7:.45))}
+  g.fx.forEach(f=>f.t+=dt);g.fx=g.fx.filter(f=>f.t<(f.k==='banner'?1.5:f.k==='float'||f.k==='combo'?1.1:f.k==='flash'?.7:f.k==='say'?.9:.45))}
 
 /* ---------- 그리기 ---------- */
 const SHOPS=[['문구','#FFD9C7','#E4572E'],['희극상회','#CFEBD0','#2E9E5B'],['웃음슈퍼','#FFE9A3','#E09B00'],['깔깔세탁','#C9E4F7','#2B7EC2'],['폭소분식','#FFC2CB','#D7263D'],['하하철물','#DDD3F2','#7A4FC2']];
@@ -470,10 +470,12 @@ function drawShots(){for(const s of g.shots){const x=s.x-g.cam;if(s.foe){gx.glob
 function drawFx(){for(const f of g.fx){const x=(f.x||0)-g.cam;
   if(f.k==='hit'){const k=f.t/.45,r=(f.big?20:14)+k*10;gx.globalAlpha=1-k*k;burst(x,f.y,r,f.big?10:8,f.bad?'#E2483D':f.big?'#FF8A1F':'#FFE45C');T(f.txt,x,f.y+6,f.big?18:14,f.bad?'#fff':'#2F2D2E');gx.globalAlpha=1}
   else if(f.k==='float'){gx.globalAlpha=Math.max(0,1-f.t/1.1);T(f.txt,x,f.y-f.t*26,f.gold?13:15,f.gold?'#D7263D':'#6B6460','#fff',3);gx.globalAlpha=1}
+  else if(f.k==='say'){const p=g.p,a=f.t<.08?f.t/.08:Math.max(0,Math.min(1,(.9-f.t)/.2));gx.font='14px "Black Han Sans","Do Hyeon",sans-serif';const w=gx.measureText(f.txt).width+18,bx=clampN(p.x-g.cam,w/2+4,GW-w/2-4),by=Math.max(34,p.y-p.h-20);
+    gx.globalAlpha=a;gx.fillStyle='#FFFDF7';gx.strokeStyle='#2F2D2E';gx.lineWidth=2.2;gx.lineJoin='round';rrect(bx-w/2,by-13,w,24,10);gx.fill();gx.stroke();gx.beginPath();gx.moveTo(bx-5,by+10.5);gx.lineTo(bx,by+18);gx.lineTo(bx+5,by+10.5);gx.fill();gx.stroke();gx.fillRect(bx-4.5,by+8,9,3);T(f.txt,bx,by+4,14,'#2F2D2E');gx.globalAlpha=1}
   else if(f.k==='combo'){gx.globalAlpha=Math.max(0,1-f.t/1.1);T(f.txt,GW/2,GH-OFF-52-f.t*10,17,'#FFE45C','#2F2D2E',4);gx.globalAlpha=1}
   else if(f.k==='flash'){gx.fillStyle=f.gold?`rgba(255,214,64,${.85*(1-f.t/.7)})`:`rgba(255,255,255,${.95*(1-f.t/.7)})`;gx.fillRect(0,-OFF,GW,GH+OFF)}
   else if(f.k==='banner'){const k=f.t/1.5,s=f.t<.15?f.t/.15:1,a=k>.8?(1-k)/.2:1;gx.save();gx.globalAlpha=a;gx.translate(GW/2,f.low?240:60);gx.rotate(-.05);gx.scale(.6+s*.4,.6+s*.4);
-    gx.fillStyle=f.bad?'#2F2D2E':'#E2483D';gx.fillRect(-150,-24,300,40);gx.strokeStyle='#2F2D2E';gx.lineWidth=3;gx.strokeRect(-150,-24,300,40);T(f.txt,0,8,26,'#FFE45C','#2F2D2E',4);gx.restore()}}}
+    gx.font='26px "Black Han Sans","Do Hyeon",sans-serif';const bw=Math.max(150,gx.measureText(f.txt).width/2+24);gx.fillStyle=f.bad?'#2F2D2E':'#E2483D';gx.fillRect(-bw,-24,bw*2,40);gx.strokeStyle='#2F2D2E';gx.lineWidth=3;gx.strokeRect(-bw,-24,bw*2,40);T(f.txt,0,8,26,'#FFE45C','#2F2D2E',4);gx.restore()}}}
 function bar(x,y,w,h,v,col){gx.fillStyle='#2F2D2E';gx.fillRect(x-2,y-2,w+4,h+4);gx.fillStyle='#FFFDF7';gx.fillRect(x,y,w,h);gx.fillStyle=col;gx.fillRect(x,y,w*clampN(v,0,1),h)}
 function drawHud(){const p=g.p;gx.textBaseline='alphabetic';
   gx.textAlign='left';gx.font='13px "Black Han Sans","Do Hyeon",sans-serif';gx.lineJoin='round';gx.strokeStyle='#fff';gx.lineWidth=3;gx.strokeText(p.name,10,16);gx.fillStyle='#2F2D2E';gx.fillText(p.name,10,16);
